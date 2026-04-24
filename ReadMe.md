@@ -26,7 +26,6 @@ Habit Tracker — это веб-приложение для отслеживан
 - **Аутентификация:** JWT (djangorestframework-simplejwt)
 - **Документация:** drf-spectacular (Swagger)
 
----
 
 ## Установка и запуск
 
