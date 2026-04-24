@@ -8,7 +8,7 @@ TELEGRAM_API = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}"
 def send_telegram_message(chat_id, text):
     """Отправка сообщения"""
     url = f"{TELEGRAM_API}/sendMessage"
-    data = {'chat_id': chat_id, 'text': text, 'parse_mode': 'HTML'}
+    data = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
     return requests.post(url, data=data).json()
 
 

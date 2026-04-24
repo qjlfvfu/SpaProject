@@ -4,24 +4,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from rest_framework import generics, permissions
+from rest_framework import generics, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from .models import CustomUser
 from .serializers import (
-    CustomUserSerializer,
     UserRegistrationSerializer,
     UserLoginSerializer,
-    TelegramSetSerializer
+    TelegramSetSerializer,
 )
-from rest_framework import viewsets, permissions
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     """ViewSet для пользователей (API)"""
+
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -32,10 +30,13 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             return CustomUser.objects.all()
         return CustomUser.objects.filter(id=user.id)
 
+
 # ========== ШАБЛОННЫЕ ПРЕДСТАВЛЕНИЯ (для HTML) ==========
+
 
 class UserRegisterView(CreateView):
     """Регистрация нового пользователя (HTML)"""
+
     model = CustomUser
     form_class = CustomUserCreationForm
     template_name = "users/register.html"
@@ -50,6 +51,7 @@ class UserRegisterView(CreateView):
 
 class UserLoginView(LoginView):
     """Вход в систему (HTML)"""
+
     template_name = "users/login.html"
     redirect_authenticated_user = True
 
@@ -63,6 +65,7 @@ class UserLoginView(LoginView):
 
 class UserLogoutView(LogoutView):
     """Выход из системы (HTML)"""
+
     next_page = reverse_lazy("home")
 
     def dispatch(self, request, *args, **kwargs):
@@ -72,6 +75,7 @@ class UserLogoutView(LogoutView):
 
 class ProfileView(LoginRequiredMixin, DetailView):
     """Профиль пользователя (HTML)"""
+
     model = CustomUser
     template_name = "users/profile.html"
     context_object_name = "user"
@@ -82,6 +86,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирование профиля (HTML)"""
+
     model = CustomUser
     form_class = CustomUserChangeForm
     template_name = "users/profile_edit.html"
@@ -101,8 +106,10 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 # ========== API ПРЕДСТАВЛЕНИЯ (JSON) ==========
 
+
 class APIRegistrationView(generics.CreateAPIView):
     """Регистрация пользователя (API)"""
+
     queryset = CustomUser.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
@@ -110,6 +117,7 @@ class APIRegistrationView(generics.CreateAPIView):
 
 class APILoginView(generics.GenericAPIView):
     """Авторизация пользователя (API / JWT)"""
+
     serializer_class = UserLoginSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -118,24 +126,27 @@ class APILoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         user = authenticate(
-            email=serializer.validated_data['email'],
-            password=serializer.validated_data['password']
+            email=serializer.validated_data["email"],
+            password=serializer.validated_data["password"],
         )
 
         if not user:
-            return Response({'error': 'Неверные учетные данные'}, status=400)
+            return Response({"error": "Неверные учетные данные"}, status=400)
 
         refresh = RefreshToken.for_user(user)
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': CustomUserSerializer(user).data
-        })
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": CustomUserSerializer(user).data,
+            }
+        )
 
 
 class APIProfileView(generics.RetrieveUpdateAPIView):
     """Профиль пользователя (API)"""
+
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -145,6 +156,7 @@ class APIProfileView(generics.RetrieveUpdateAPIView):
 
 class APITelegramConnectView(generics.GenericAPIView):
     """Привязка Telegram chat_id (API)"""
+
     serializer_class = TelegramSetSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -153,7 +165,7 @@ class APITelegramConnectView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         user = request.user
-        user.telegram_chat_id = serializer.validated_data['telegram_chat_id']
+        user.telegram_chat_id = serializer.validated_data["telegram_chat_id"]
         user.save()
 
-        return Response({'message': 'Telegram привязан'})
+        return Response({"message": "Telegram привязан"})
