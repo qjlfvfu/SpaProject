@@ -7,6 +7,7 @@ from users.models import CustomUser
 
 # Create your models here.
 class Habit(models.Model):
+    objects = None
     name = models.CharField(
         max_length=30,
         help_text="Введите название привычки",
@@ -55,6 +56,7 @@ class Habit(models.Model):
         choices=[(True, "Опубликовано"), (False, "Не опубликовано")],
     )
     reward = models.CharField(
+        max_length=200,
         verbose_name="Награда за выполнение", default=None, blank=True, null=True
     )
     related_habit = models.ForeignKey(

@@ -1,4 +1,4 @@
-{% extends 'users/base.html' %}
+{% extends 'base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans 'Профиль' %} - SpaProfile{% endblock %}
@@ -30,10 +30,32 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="w-25">Ф.И.О.</td>
+                                <td class="w-25">Имя</td>
                                 <td>
                                     <input type="text" name="name" class="form-control"
-                                           value="{{ user.name }}" placeholder="Ваше Ф.И.О." required>
+                                           value="{{ user.name }}" placeholder="Ваше имя" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">Страна</td>
+                                <td>
+                                    <input type="text" name="country" class="form-control"
+                                           value="{{ user.country|default:'' }}" placeholder="Страна">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">Телефон</td>
+                                <td>
+                                    <input type="text" name="phone_number" class="form-control"
+                                           value="{{ user.phone_number|default:'' }}" placeholder="Телефон">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">Telegram ID</td>
+                                <td>
+                                    <input type="text" name="telegram_chat_id" class="form-control"
+                                           value="{{ user.telegram_chat_id|default:'' }}" placeholder="Для уведомлений">
+                                    <small class="text-muted d-block">ID чата Telegram для получения уведомлений</small>
                                 </td>
                             </tr>
                             <tr>
@@ -57,9 +79,9 @@
                             <button type="submit" class="btn btn-lg btn-primary">
                                 <i class="bi bi-save"></i> Сохранить изменения
                             </button>
-                            <button type="reset" class="btn btn-lg btn-outline-secondary">
-                                <i class="bi bi-arrow-counterclockwise"></i> Сбросить
-                            </button>
+                            <a href="{% url 'users:profile' %}" class="btn btn-lg btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Отмена
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -68,37 +90,45 @@
 
         <!-- Боковая панель с действиями -->
         <div class="col-lg-3 col-md-6 col-sm-12">
-            <!-- Аватар пользователя (если есть поле avatar в модели) -->
-            {% if user.avatar %}
+            <!-- Аватар пользователя -->
             <div class="card mb-4 box-shadow">
                 <div class="card-header">
                     <h4 class="my-0 font-weight-normal">Аватар</h4>
                 </div>
                 <div class="card-body text-center">
-                    <img src="{{ user.avatar.url }}" alt="{{ user.name }}"
-                         class="img-fluid rounded-circle mb-3" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.name }}"
+                             class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                            <span class="text-white display-1">{{ user.name|first|upper|default:"U" }}</span>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
 
-            <!-- Статистика пользователя -->
+            <!-- Статистика привычек -->
             <div class="card mb-4 box-shadow">
                 <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">Статистика</h4>
+                    <h4 class="my-0 font-weight-normal">Статистика привычек</h4>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Клиенты
-                            <span class="badge bg-primary rounded-pill">{{ total_clients|default:0 }}</span>
+                            Всего привычек
+                            <span class="badge bg-primary rounded-pill">{{ total_habits|default:0 }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Сообщения
-                            <span class="badge bg-success rounded-pill">{{ total_messages|default:0 }}</span>
+                            Полезные привычки
+                            <span class="badge bg-success rounded-pill">{{ useful_habits|default:0 }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Рассылки
-                            <span class="badge bg-info rounded-pill">{{ total_mailings|default:0 }}</span>
+                            Приятные привычки
+                            <span class="badge bg-info rounded-pill">{{ pleasant_habits|default:0 }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Публичные привычки
+                            <span class="badge bg-warning rounded-pill">{{ public_habits|default:0 }}</span>
                         </li>
                     </ul>
                 </div>
@@ -111,17 +141,12 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <!-- Ссылки на spammanager -->
-                        <a href="{% url 'spammanager:client_list' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-people"></i> Мои клиенты
+                        <a href="{% url 'habits:habit_list' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-check-circle"></i> Мои привычки
                         </a>
 
-                        <a href="{% url 'spammanager:message_list' %}" class="btn btn-outline-success">
-                            <i class="bi bi-envelope"></i> Мои сообщения
-                        </a>
-
-                        <a href="{% url 'spammanager:mailing_list' %}" class="btn btn-outline-info">
-                            <i class="bi bi-send"></i> Мои рассылки
+                        <a href="{% url 'habits:habit_create' %}" class="btn btn-outline-success">
+                            <i class="bi bi-plus-circle"></i> Создать привычку
                         </a>
 
                         <hr>
@@ -130,11 +155,6 @@
                         {% if user.is_staff %}
                         <div class="alert alert-success mb-2 text-center">
                             <i class="bi bi-shield-check"></i> Администратор
-                        </div>
-                        {% endif %}
-                        {% if user.is_manager %}
-                        <div class="alert alert-info mb-2 text-center">
-                            <i class="bi bi-person-badge"></i> Менеджер
                         </div>
                         {% endif %}
 
@@ -170,7 +190,6 @@
 </div>
 
 <script>
-// Автоматическое скрытие уведомлений через 5 секунд
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         var toasts = document.querySelectorAll('.toast');
