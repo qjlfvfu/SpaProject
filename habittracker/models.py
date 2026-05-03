@@ -57,7 +57,10 @@ class Habit(models.Model):
     )
     reward = models.CharField(
         max_length=200,
-        verbose_name="Награда за выполнение", default=None, blank=True, null=True
+        verbose_name="Награда за выполнение",
+        default=None,
+        blank=True,
+        null=True,
     )
     related_habit = models.ForeignKey(
         "self",
@@ -124,6 +127,7 @@ class Habit(models.Model):
 
 
 class Tracker(models.Model):
+    objects = None
     habit = models.ForeignKey(
         Habit,
         on_delete=CASCADE,
@@ -139,7 +143,7 @@ class Tracker(models.Model):
         choices=[(True, "Выполнено"), (False, "Не выполнено")],
     )
     actual_duration = models.DurationField(
-        verbose_name="Фактическое время выполнения", default=None, null=True
+        verbose_name="Фактическое время выполнения", default=None, null=True,blank=True
     )
     completed_date = models.DateField(
         verbose_name="Дата выполнения", auto_now_add=False

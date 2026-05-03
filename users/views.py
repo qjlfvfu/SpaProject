@@ -17,14 +17,16 @@ from .serializers import (
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 
+
 # === ГЛАВНАЯ СТРАНИЦА ===
 def home_view(request):
     """Главная страница"""
-    return render(request, 'home.html')
+    return render(request, "home.html")
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     """ViewSet для пользователей (API)"""
+
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -38,8 +40,10 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 
 # ========== ШАБЛОННЫЕ ПРЕДСТАВЛЕНИЯ (для HTML) ==========
 
+
 class UserRegisterView(CreateView):
     """Регистрация нового пользователя (HTML)"""
+
     model = CustomUser
     form_class = CustomUserCreationForm
     template_name = "users/register.html"
@@ -53,8 +57,10 @@ class UserRegisterView(CreateView):
         )
         return response
 
+
 class UserLoginView(LoginView):
     """Вход в систему (HTML)"""
+
     template_name = "users/login.html"
     redirect_authenticated_user = True
 
@@ -68,6 +74,7 @@ class UserLoginView(LoginView):
 
 class UserLogoutView(LogoutView):
     """Выход из системы (HTML)"""
+
     next_page = reverse_lazy("users:home")
 
     def dispatch(self, request, *args, **kwargs):
@@ -77,6 +84,7 @@ class UserLogoutView(LogoutView):
 
 class ProfileView(LoginRequiredMixin, DetailView):
     """Профиль пользователя (HTML)"""
+
     model = CustomUser
     template_name = "users/profile.html"
     context_object_name = "user"
@@ -91,22 +99,24 @@ class ProfileView(LoginRequiredMixin, DetailView):
         # Статистика привычек
         try:
             from habittracker.models import Habit
+
             habits = Habit.objects.filter(customer=user)
-            context['total_habits'] = habits.count()
-            context['useful_habits'] = habits.filter(is_pleasant=False).count()
-            context['pleasant_habits'] = habits.filter(is_pleasant=True).count()
-            context['public_habits'] = habits.filter(is_public=True).count()
-        except:
-            context['total_habits'] = 0
-            context['useful_habits'] = 0
-            context['pleasant_habits'] = 0
-            context['public_habits'] = 0
+            context["total_habits"] = habits.count()
+            context["useful_habits"] = habits.filter(is_pleasant=False).count()
+            context["pleasant_habits"] = habits.filter(is_pleasant=True).count()
+            context["public_habits"] = habits.filter(is_public=True).count()
+        except Exception:
+            context["total_habits"] = 0
+            context["useful_habits"] = 0
+            context["pleasant_habits"] = 0
+            context["public_habits"] = 0
 
         return context
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирование профиля (HTML)"""
+
     model = CustomUser
     form_class = CustomUserChangeForm
     template_name = "users/profile_edit.html"
@@ -126,8 +136,10 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 # ========== API ПРЕДСТАВЛЕНИЯ (JSON) ==========
 
+
 class APIRegistrationView(generics.CreateAPIView):
     """Регистрация пользователя (API)"""
+
     queryset = CustomUser.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
@@ -135,6 +147,7 @@ class APIRegistrationView(generics.CreateAPIView):
 
 class APILoginView(generics.GenericAPIView):
     """Авторизация пользователя (API / JWT)"""
+
     serializer_class = UserLoginSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -163,6 +176,7 @@ class APILoginView(generics.GenericAPIView):
 
 class APIProfileView(generics.RetrieveUpdateAPIView):
     """Профиль пользователя (API)"""
+
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -172,6 +186,7 @@ class APIProfileView(generics.RetrieveUpdateAPIView):
 
 class APITelegramConnectView(generics.GenericAPIView):
     """Привязка Telegram chat_id (API)"""
+
     serializer_class = TelegramSetSerializer
     permission_classes = [permissions.IsAuthenticated]
 

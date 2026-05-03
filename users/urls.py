@@ -5,7 +5,7 @@ app_name = "users"
 
 urlpatterns = [
     # HTML представления
-    path('', views.home_view, name='home'),
+    path("", views.home_view, name="home"),
     path("register/", views.UserRegisterView.as_view(), name="register"),
     path("login/", views.UserLoginView.as_view(), name="login"),
     path("logout/", views.UserLogoutView.as_view(), name="logout"),

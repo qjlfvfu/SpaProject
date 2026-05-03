@@ -10,7 +10,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         # Для публичных привычек можно добавить проверку
-        if hasattr(obj, 'is_public') and obj.is_public and request.method == 'GET':
+        if hasattr(obj, "is_public") and obj.is_public and request.method == "GET":
             return True
 
         return obj.customer == request.user
@@ -21,7 +21,7 @@ class IsOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Проверка на существование атрибута customer
-        if not hasattr(obj, 'customer'):
+        if not hasattr(obj, "customer"):
             return False
         return obj.customer == request.user
 
@@ -40,10 +40,11 @@ class CanCompleteHabit(permissions.BasePermission):
 
     def has_permission(self, request, view):
         # Для экшена complete проверяем владельца привычки
-        if view.action == 'complete' and view.kwargs.get('pk'):
+        if view.action == "complete" and view.kwargs.get("pk"):
             from .models import Habit
+
             try:
-                habit = Habit.objects.get(pk=view.kwargs['pk'])
+                habit = Habit.objects.get(pk=view.kwargs["pk"])
                 return habit.customer == request.user
             except Habit.DoesNotExist:
                 return False

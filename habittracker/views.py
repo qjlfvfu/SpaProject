@@ -9,10 +9,16 @@ from .models import Habit, Tracker
 from .serializers import HabitSerializer, HabitListSerializer, TrackerSerializer
 from .paginators import HabitPagination
 from .permissions import IsOwner, IsOwnerOrReadOnlyForTracker
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView,
+    CreateView,
+    DetailView,
+    UpdateView,
+    DeleteView,
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from .forms import HabitForm
+from .forms import HabitForm, TrackerForm
 from django.contrib import messages
 from django.shortcuts import redirect
 
@@ -48,7 +54,7 @@ class HabitViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def complete(self, request, pk=None):
         """Отметить привычку как выполненную"""
         habit = self.get_object()
@@ -56,29 +62,24 @@ class HabitViewSet(viewsets.ModelViewSet):
         # Проверяем, не отмечали ли уже сегодня
         today = timezone.now().date()
         exists_today = Tracker.objects.filter(
-            habit=habit,
-            user=request.user,
-            completed_date=today
+            habit=habit, user=request.user, completed_date=today
         ).exists()
 
         if exists_today:
             return Response(
                 {"error": "Сегодня вы уже отмечали эту привычку"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Создаем отметку о выполнении
         tracker = Tracker.objects.create(
-            habit=habit,
-            user=request.user,
-            status=True,
-            completed_date=today
+            habit=habit, user=request.user, status=True, completed_date=today
         )
 
         serializer = TrackerSerializer(tracker)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def stats(self, request, pk=None):
         """Статистика по привычке"""
         habit = self.get_object()
@@ -94,17 +95,16 @@ class HabitViewSet(viewsets.ModelViewSet):
         for i in range(7):
             day = today - timezone.timedelta(days=i)
             tracked = trackers.filter(completed_date=day, status=True).exists()
-            last_week.append({
-                "date": day.isoformat(),
-                "completed": tracked
-            })
+            last_week.append({"date": day.isoformat(), "completed": tracked})
 
-        return Response({
-            "total_trackings": total,
-            "completed": completed,
-            "success_rate": round(success_rate, 2),
-            "last_week": last_week
-        })
+        return Response(
+            {
+                "total_trackings": total,
+                "completed": completed,
+                "success_rate": round(success_rate, 2),
+                "last_week": last_week,
+            }
+        )
 
 
 class PublicHabitListView(viewsets.ReadOnlyModelViewSet):
@@ -118,7 +118,7 @@ class PublicHabitListView(viewsets.ReadOnlyModelViewSet):
     search_fields = ["name", "action"]
 
     def get_queryset(self):
-        return Habit.objects.filter(is_public=True).select_related('customer')
+        return Habit.objects.filter(is_public=True).select_related("customer")
 
 
 class TrackerViewSet(viewsets.ModelViewSet):
@@ -129,24 +129,24 @@ class TrackerViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Tracker.objects.filter(user=self.request.user).select_related('habit')
+        return Tracker.objects.filter(user=self.request.user).select_related("habit")
 
     def perform_create(self, serializer):
         # Проверяем, что привычка принадлежит пользователю
-        habit = serializer.validated_data.get('habit')
+        habit = serializer.validated_data.get("habit")
         if habit.customer != self.request.user:
             raise ValidationError("Вы можете отмечать выполнение только своих привычек")
 
         # Проверяем, что дата не в будущем
-        completed_date = serializer.validated_data.get('completed_date', timezone.now().date())
+        completed_date = serializer.validated_data.get(
+            "completed_date", timezone.now().date()
+        )
         if completed_date > timezone.now().date():
             raise ValidationError("Нельзя отметить выполнение в будущем")
 
         # Проверяем, нет ли уже отметки за этот день
         exists = Tracker.objects.filter(
-            habit=habit,
-            user=self.request.user,
-            completed_date=completed_date
+            habit=habit, user=self.request.user, completed_date=completed_date
         ).exists()
 
         if exists:
@@ -157,18 +157,18 @@ class TrackerViewSet(viewsets.ModelViewSet):
 
 class HabitListView(LoginRequiredMixin, ListView):
     model = Habit
-    template_name = 'habits/habit_list.html'
-    context_object_name = 'object_list'
+    template_name = "habits/habit_list.html"
+    context_object_name = "object_list"
     paginate_by = 10
 
     def get_queryset(self):
         queryset = Habit.objects.filter(customer=self.request.user)
-        status = self.request.GET.get('status')
-        if status == 'pleasant':
+        status = self.request.GET.get("status")
+        if status == "pleasant":
             queryset = queryset.filter(is_pleasant=True)
-        elif status == 'useful':
+        elif status == "useful":
             queryset = queryset.filter(is_pleasant=False)
-        elif status == 'public':
+        elif status == "public":
             queryset = queryset.filter(is_public=True)
         return queryset
 
@@ -176,23 +176,23 @@ class HabitListView(LoginRequiredMixin, ListView):
 class HabitCreateView(LoginRequiredMixin, CreateView):
     model = Habit
     form_class = HabitForm
-    template_name = 'habits/habit_form.html'
-    success_url = reverse_lazy('habits:habit_list')
+    template_name = "habits/habit_form.html"
+    success_url = reverse_lazy("habits:habit_list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
     def form_valid(self, form):
         form.instance.customer = self.request.user
-        messages.success(self.request, 'Привычка успешно создана!')
+        messages.success(self.request, "Привычка успешно создана!")
         return super().form_valid(form)
 
 
 class HabitDetailView(LoginRequiredMixin, DetailView):
     model = Habit
-    template_name = 'habits/habit_detail.html'
+    template_name = "habits/habit_detail.html"
 
     def get_queryset(self):
         return Habit.objects.filter(customer=self.request.user)
@@ -200,52 +200,71 @@ class HabitDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         trackers = Tracker.objects.filter(habit=self.object, user=self.request.user)
-        context['success_count'] = trackers.filter(status=True).count()
-        context['fail_count'] = trackers.filter(status=False).count()
+        context["success_count"] = trackers.filter(status=True).count()
+        context["fail_count"] = trackers.filter(status=False).count()
         return context
 
 
 class HabitUpdateView(LoginRequiredMixin, UpdateView):
     model = Habit
     form_class = HabitForm
-    template_name = 'habits/habit_form.html'
-    success_url = reverse_lazy('habits:habit_list')
+    template_name = "habits/habit_form.html"
+    success_url = reverse_lazy("habits:habit_list")
 
     def get_queryset(self):
         return Habit.objects.filter(customer=self.request.user)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, 'Привычка успешно обновлена!')
+        messages.success(self.request, "Привычка успешно обновлена!")
         return super().form_valid(form)
 
 
 class HabitDeleteView(LoginRequiredMixin, DeleteView):
     model = Habit
-    template_name = 'habits/habit_confirm_delete.html'
-    success_url = reverse_lazy('habits:habit_list')
+    template_name = "habits/habit_confirm_delete.html"
+    success_url = reverse_lazy("habits:habit_list")
 
     def get_queryset(self):
         return Habit.objects.filter(customer=self.request.user)
 
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, 'Привычка удалена!')
+        messages.success(self.request, "Привычка удалена!")
         return super().delete(request, *args, **kwargs)
 
 
 def complete_habit(request, pk):
-    """Отметить выполнение привычки"""
-    habit = Habit.objects.get(pk=pk, customer=request.user)
+    import traceback
     from django.utils import timezone
-    Tracker.objects.create(
-        habit=habit,
-        user=request.user,
-        status=True,
-        completed_date=timezone.now().date()
-    )
-    messages.success(request, f'Привычка "{habit.name}" отмечена как выполненная!')
-    return redirect('habits:habit_detail', pk=pk)
+    from .models import Habit, Tracker
+
+    try:
+        habit = Habit.objects.get(pk=pk, customer=request.user)
+        Tracker.objects.create(
+            habit=habit,
+            user=request.user,
+            status=True,
+            completed_date=timezone.now().date()
+        )
+        messages.success(request, f'Привычка "{habit.name}" отмечена как выполненная!')
+        return redirect("habits:habit_detail", pk=pk)
+    except Exception as e:
+        print("ОШИБКА:", e)
+        traceback.print_exc()
+        messages.error(request, f"Не удалось отметить привычку: {e}")
+        return redirect("habits:habit_list")
+
+
+class TrackerCreateView(LoginRequiredMixin, CreateView):
+    model = Tracker
+    form_class = TrackerForm
+    template_name = "habits/tracker_form.html"
+    success_url = reverse_lazy("habits:habit_list")
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
