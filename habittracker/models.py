@@ -143,7 +143,7 @@ class Tracker(models.Model):
         choices=[(True, "Выполнено"), (False, "Не выполнено")],
     )
     actual_duration = models.DurationField(
-        verbose_name="Фактическое время выполнения", default=None, null=True,blank=True
+        verbose_name="Фактическое время выполнения", default=None, null=True, blank=True
     )
     completed_date = models.DateField(
         verbose_name="Дата выполнения", auto_now_add=False

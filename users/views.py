@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from rest_framework import generics, viewsets, permissions
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -22,22 +22,6 @@ from .serializers import CustomUserSerializer
 def home_view(request):
     """Главная страница"""
     return render(request, "home.html")
-
-
-class CustomUserViewSet(viewsets.ModelViewSet):
-    """ViewSet для пользователей (API)"""
-
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return CustomUser.objects.all()
-        return CustomUser.objects.filter(id=user.id)
-
-
 # ========== ШАБЛОННЫЕ ПРЕДСТАВЛЕНИЯ (для HTML) ==========
 
 
