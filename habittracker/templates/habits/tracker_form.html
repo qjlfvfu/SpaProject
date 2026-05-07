@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Отметить привычку{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>Отметить выполнение привычки</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {{ form.as_p }}
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            ✅ Отметить
+                        </button>
+                        <a href="{% url 'habits:habit_list' %}" class="btn btn-secondary w-100 mt-2">
+                            Отмена
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои привычки{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Мои привычки</h1>
+    <a href="{% url 'habits:habit_create' %}" class="btn btn-primary">+ Добавить привычку</a>
+</div>
+
+<!-- Фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <select name="status" class="form-select">
+                    <option value="all">Все привычки</option>
+                    <option value="pleasant">Приятные</option>
+                    <option value="useful">Полезные</option>
+                    <option value="public">Публичные</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Поиск по названию...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Фильтр</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Список привычек -->
+<div class="row">
+    {% if object_list %}
+        {% for habit in object_list %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title">{{ habit.name }}</h5>
+                        <div>
+                            {% if habit.is_pleasant %}
+                                <span class="badge bg-success">Приятная</span>
+                            {% else %}
+                                <span class="badge bg-primary">Полезная</span>
+                            {% endif %}
+                            {% if habit.is_public %}
+                                <span class="badge bg-info">Public</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">{{ habit.action }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            ⏰ {{ habit.time|time:"H:i" }}<br>
+                            📍 {{ habit.place }}<br>
+                            🔄 Каждые {{ habit.period }} дн.
+                        </small>
+                    </p>
+                    <div class="btn-group w-100">
+                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeModal{{ habit.id }}">
+                            ✅ Выполнить
+                        </button>
+                        <a href="{% url 'habits:habit_detail' habit.pk %}" class="btn btn-sm btn-outline-info">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для отметки выполнения -->
+        <div class="modal fade" id="completeModal{{ habit.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Отметить выполнение</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="post" action="{% url 'habits:habit_complete' habit.pk %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <p>Выполнили привычку "{{ habit.name }}"?”</p>
+                            <input type="hidden" name="habit_id" value="{{ habit.id }}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-success">Да, выполнил(а)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                У вас пока нет привычек.
+                <a href="{% url 'habits:habit_create' %}">Создайте первую привычку</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">««</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a></li>
+        {% endif %}
+
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">»»</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

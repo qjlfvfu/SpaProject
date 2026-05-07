@@ -1,0 +1,203 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "username": "admin",
+      "email": "admin@example.com",
+      "first_name": "Админ",
+      "last_name": "Системный",
+      "is_staff": true,
+      "is_superuser": true,
+      "is_active": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "username": "alex_ivanov",
+      "email": "alex@example.com",
+      "first_name": "Алексей",
+      "last_name": "Иванов",
+      "is_staff": false,
+      "is_superuser": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "username": "maria_petrova",
+      "email": "maria@example.com",
+      "first_name": "Мария",
+      "last_name": "Петрова",
+      "is_staff": false,
+      "is_superuser": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "habittracker.habit",
+    "pk": 1,
+    "fields": {
+      "name": "Утренняя зарядка",
+      "customer": 2,
+      "description": "Делать зарядку каждое утро для бодрости",
+      "place": "Дома",
+      "action": "делать зарядку",
+      "is_pleasant": false,
+      "planned_duration": "00:02:00",
+      "period": 1,
+      "is_public": true,
+      "reward": "Выпить чашечку кофе",
+      "related_habit": null,
+      "time": "07:00:00",
+      "last_sent": null
+    }
+  },
+  {
+    "model": "habittracker.habit",
+    "pk": 2,
+    "fields": {
+      "name": "Чтение перед сном",
+      "customer": 2,
+      "description": "Читать книгу 15 минут перед сном",
+      "place": "Кровать",
+      "action": "читать книгу",
+      "is_pleasant": true,
+      "planned_duration": "00:15:00",
+      "period": 1,
+      "is_public": true,
+      "reward": null,
+      "related_habit": null,
+      "time": "22:30:00",
+      "last_sent": null
+    }
+  },
+  {
+    "model": "habittracker.habit",
+    "pk": 3,
+    "fields": {
+      "name": "Пить воду",
+      "customer": 2,
+      "description": "Выпивать 2 литра воды в день",
+      "place": "На работе",
+      "action": "пить воду",
+      "is_pleasant": false,
+      "planned_duration": "00:01:00",
+      "period": 1,
+      "is_public": false,
+      "reward": "Сладкий перекус",
+      "related_habit": null,
+      "time": "10:00:00",
+      "last_sent": null
+    }
+  },
+  {
+    "model": "habittracker.habit",
+    "pk": 4,
+    "fields": {
+      "name": "Прогулка",
+      "customer": 2,
+      "fields": {
+        "name": "Медитация",
+        "customer": 3,
+        "description": "10 минут медитации для спокойствия",
+        "place": "Дома",
+        "action": "медитировать",
+        "is_pleasant": true,
+        "planned_duration": "00:10:00",
+        "period": 1,
+        "is_public": true,
+        "reward": null,
+        "related_habit": null,
+        "time": "08:00:00",
+        "last_sent": null
+      }
+    }
+  },
+  {
+    "model": "habittracker.habit",
+    "pk": 5,
+    "fields": {
+      "name": "Английский язык",
+      "customer": 3,
+      "description": "Учить 20 новых слов",
+      "place": "Дома",
+      "action": "учить слова",
+      "is_pleasant": false,
+      "planned_duration": "00:30:00",
+      "period": 1,
+      "is_public": false,
+      "reward": "Просмотр сериала",
+      "related_habit": 4,
+      "time": "19:00:00",
+      "last_sent": null
+    }
+  },
+  {
+    "model": "habittracker.habit",
+    "pk": 6,
+    "fields": {
+      "name": "Замена вредной привычки",
+      "customer": 3,
+      "description": "Вместо курения - делать зарядку для пальцев",
+      "place": "На балконе",
+      "action": "делать зарядку для пальцев",
+      "is_pleasant": false,
+      "planned_duration": "00:01:00",
+      "period": 1,
+      "is_public": false,
+      "reward": null,
+      "related_habit": 4,
+      "time": "15:00:00",
+      "last_sent": null
+    }
+  },
+  {
+    "model": "habittracker.tracker",
+    "pk": 1,
+    "fields": {
+      "habit": 1,
+      "user": 2,
+      "status": true,
+      "actual_duration": "00:02:00",
+      "completed_date": "2024-01-15"
+    }
+  },
+  {
+    "model": "habittracker.tracker",
+    "pk": 2,
+    "fields": {
+      "habit": 1,
+      "user": 2,
+      "status": true,
+      "actual_duration": "00:02:30",
+      "completed_date": "2024-01-16"
+    }
+  },
+  {
+    "model": "habittracker.tracker",
+    "pk": 3,
+    "fields": {
+      "habit": 2,
+      "user": 2,
+      "status": true,
+      "actual_duration": "00:15:00",
+      "completed_date": "2024-01-15"
+    }
+  },
+  {
+    "model": "habittracker.tracker",
+    "pk": 4,
+    "fields": {
+      "habit": 3,
+      "user": 2,
+      "status": false,
+      "actual_duration": null,
+      "completed_date": "2024-01-16"
+    }
+  }
+]

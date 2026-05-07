@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ habit.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>{{ habit.name }}</h3>
+                <div>
+                    <a href="{% url 'habits:habit_update' habit.pk %}" class="btn btn-warning btn-sm">Редактировать</a>
+                    <a href="{% url 'habits:habit_delete' habit.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Действие:</strong> {{ habit.action }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Место:</strong> {{ habit.place }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Время:</strong> {{ habit.time|time:"H:i" }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Периодичность:</strong> Каждые {{ habit.period }} дн.
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Длительность:</strong> {{ habit.planned_duration }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Тип:</strong> 
+                        {% if habit.is_pleasant %}Приятная{% else %}Полезная{% endif %}
+                    </div>
+                </div>
+                
+                {% if habit.description %}
+                <div class="mb-3">
+                    <strong>Описание:</strong>
+                    <p>{{ habit.description }}</p>
+                </div>
+                {% endif %}
+                
+                {% if habit.reward %}
+                <div class="mb-3">
+                    <strong>Награда:</strong> {{ habit.reward }}
+                </div>
+                {% endif %}
+                
+                {% if habit.related_habit %}
+                <div class="mb-3">
+                    <strong>Связанная привычка:</strong> 
+                    <a href="{% url 'habits:habit_detail' habit.related_habit.pk %}">{{ habit.related_habit.name }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Статистика</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statsChart" width="200" height="200"></canvas>
+                <div class="text-center mt-3">
+                    <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#completeModal">
+                        ✅ Отметить выполнение
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для отметки -->
+<div class="modal fade" id="completeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Отметить выполнение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'habits:habit_complete' habit.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Вы выполнили привычку "{{ habit.name }}"?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+                    <button type="submit" class="btn btn-success">Да, выполнил(а)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Выполнено', 'Пропущено'],
+            datasets: [{
+                data: [{{ success_count }}, {{ fail_count }}],
+                backgroundColor: ['#28a745', '#dc3545']
+            }]
+        }
+    });
+</script>
+{% endblock %}
